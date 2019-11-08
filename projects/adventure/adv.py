@@ -52,28 +52,113 @@ class Stack():
 #
 traversalPath = []
 
-def transverseRoom():
-    # roomTransversed = [0]
-    roomTransversed = {0:{}}
-    s = Stack()
-    s.push(player.currentRoom.getExits())
-    while len(roomTransversed) < len(roomGraph):
-        opposite = {'n':'s','s':'n', 'w':'e', 'e':'w'}
-        starting_room = s.pop()
-        previousRoom = None
-        direction = random.choice(starting_room)
-        previousRoom = player.currentRoom.id
-        player.travel(direction)
-        if player.currentRoom.id not in roomTransversed:
-            roomTransversed[player.currentRoom.id] = {}
+# def transverseRoom():
+#     roomTransversed = {0:{}}
+#     s = Stack()
+#     visited = []
+#     s.push(player.currentRoom.getExits())
+#     while len(roomTransversed) < len(roomGraph):
+#         opposite = {'n':'s','s':'n', 'w':'e', 'e':'w'}
+#         starting_room = s.pop()
+#         print(starting_room)
+#         previousRoom = None
+#         direction = random.choice(starting_room)
+#         previousRoom = player.currentRoom.id
+#         player.travel(direction)
+#         if player.currentRoom.id not in roomTransversed:
+#             roomTransversed[player.currentRoom.id] ={} 
+#             for i in player.currentRoom.getExits():
+#                 roomTransversed[player.currentRoom.id][i] = '?'
+#         # if room has
+#         s.push(player.currentRoom.getExits())
+#         roomTransversed[previousRoom][direction] = player.currentRoom.id
+#         roomTransversed[player.currentRoom.id][opposite[direction]] = previousRoom
+#         traversalPath.append(direction)
 
-        s.push(player.currentRoom.getExits())
-        roomTransversed[previousRoom][direction] = player.currentRoom.id
-        roomTransversed[player.currentRoom.id][opposite[direction]] = previousRoom
-        traversalPath.append(direction)
- 
+# roomTransversed = {}
+
+# roomTransversed[player.currentRoom.id] = { direction: '?' for direction in player.currentRoom.getExits()}
+
+# s = Stack()
+# visited = []
+# previousRoom = None
+# s.push(player.currentRoom.getExits())
+# opposite = {'n':'s','s':'n', 'w':'e', 'e':'w'}
+# while len(roomTransversed) < len(roomGraph):
+#     starting_room = s.pop()
+#     print(starting_room)
+#     
+#     direction = random.choice(starting_room)
+#     previousRoom = player.currentRoom.id
+#     player.travel(direction)
+#     if player.currentRoom.id not in roomTransversed:
+#         roomTransversed[player.currentRoom.id] ={} 
+#         for i in player.currentRoom.getExits():
+#             roomTransversed[player.currentRoom.id][i] = '?'
+#     # if room has
+#     s.push(player.currentRoom.getExits())
+#     roomTransversed[previousRoom][direction] = player.currentRoom.id
+#     roomTransversed[player.currentRoom.id][opposite[direction]] = previousRoom
+#     traversalPath.append(direction)
+
+
+reverse_directions = {'n': 's', 's': 'n', 'e':'w', 'w':'e'}
+
+# Create dict for transversal graph
+roomTransversed = {}
+
+# initialize stack
+stack = Stack()
+prev_room = None
+prev_direction = None
+
+# While the created traversal graph is not equal to the roomgraph
+while len(roomTransversed) < len(roomGraph):
+
+    # get player current room
+    currentRoom = player.currentRoom.id
+    
+    # if the room has not been transvered
+    if currentRoom not in roomTransversed:
+        # get all the exits in the room and set it to '?'
+        exits = {direction: '?' for direction in player.currentRoom.getExits()}
+        # add the rooms exits to the traversal room 
+        roomTransversed[currentRoom] = exits
+
+    # if there is a previous room
+    if prev_room:
+        # update the previous room traveled cardinal to the current room id
+        roomTransversed[prev_room][prev_cardinal] = currentRoom
+        # get the reverse of the traveled cardinal
+        reverse_cardinal = reverse_directions[prev_cardinal]
+        # for the current room set the reverse cardinal to the previous room
+        roomTransversed[currentRoom][reverse_cardinal] = prev_room
+    # update the previous room tot eh current room
+    prev_room = currentRoom
+    
+    # for each room hold if there is a movement from that room
+    movement = False
+    # for the cardinals in current room 
+    for exit_cardinal, room in roomTransversed[currentRoom].items():
+        # if it is unexplored
+        if room == "?":
+            prev_cardinal = exit_cardinal
+            stack.push(exit_cardinal)
+            traversalPath.append(exit_cardinal)
+            # move to next room
+            player.travel(exit_cardinal)
+            # set there was a movement
+            movement = True
+            break
+    # if there was no place to go
+    if not movement:
+        # go back the earlier moved direction
+        exit_cardinal = reverse_directions[stack.pop()]
+        traversalPath.append(exit_cardinal)
+        prev_cardinal = exit_cardinal
+        player.travel(exit_cardinal)
+
         
-transverseRoom()
 
 # TRAVERSAL TEST
 visited_rooms = set()
@@ -95,10 +180,10 @@ else:
 #######
 # UNCOMMENT TO WALK AROUND
 #######
-player.currentRoom.printRoomDescription(player)
-while True:
-    cmds = input("-> ").lower().split(" ")
-    if cmds[0] in ["n", "s", "e", "w"]:
-        player.travel(cmds[0], True)
-    else:
-        print("I did not understand that command.")
+# player.currentRoom.printRoomDescription(player)
+# while True:
+#     cmds = input("-> ").lower().split(" ")
+#     if cmds[0] in ["n", "s", "e", "w"]:
+#         player.travel(cmds[0], True)
+#     else:
+#         print("I did not understand that command.")
